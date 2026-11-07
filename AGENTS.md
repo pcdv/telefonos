@@ -33,5 +33,7 @@ never edit it; fix in web-lib, then `npm run sync -- ../telefonos/web/js/lib` th
   microphones, the public relays): the four keep three peers each, the fifth none.
 - The invitation's QR code was checked by screenshotting it in headless Chrome and decoding it
   with jsQR: it gave back the exact link.
-- Not done: push to ring a closed app (it needs a server), the
-  PNG icons iOS prefers for the home screen, reconnection after a change of network (ICE restart).
+- The icon is a cat with a headset. `icon.svg` is the source; the PNGs (`icon-192`, `icon-512`, the
+  maskable one with the cat inside the central 70%, and `apple-touch-icon`) were rendered from it
+  in headless Chrome, and the generating script is not kept: redraw the same SVG to change it.
+- Not done: push to ring a closed app (it needs a server), reconnection after a change of network (ICE restart).
