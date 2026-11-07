@@ -1,0 +1,90 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1c2530;
+  --muted: #667085;
+  --line: #d6dce5;
+  --accent: #2f5d8a;
+  --accent-fg: #ffffff;
+  --danger: #b3261e;
+  --ok: #2e7d4f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #141a22;
+    --fg: #e6ebf2;
+    --muted: #93a0b3;
+    --line: #2b3542;
+    --accent: #6ea6dc;
+    --accent-fg: #0b1118;
+    --danger: #f2877f;
+    --ok: #6fcf97;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.5 system-ui, sans-serif;
+}
+
+header {
+  padding: 0.75rem 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+h1 { margin: 0; font-size: 1.25rem; }
+h2 { margin: 0 0 1rem; font-size: 1.5rem; }
+
+main {
+  max-width: 32rem;
+  margin: 0 auto;
+  padding: 1rem 16px;
+}
+
+.hint, .empty, .waiting { color: var(--muted); }
+
+ul { list-style: none; margin: 0; padding: 0; }
+
+li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+li .name { flex: 1; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+li .state { color: var(--muted); font-size: 0.875rem; }
+li.connected .state { color: var(--ok); }
+
+.actions { display: flex; gap: 0.5rem; margin-top: 1.25rem; flex-wrap: wrap; }
+
+button {
+  font: inherit;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+button.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+button.danger { background: var(--danger); border-color: var(--danger); color: var(--bg); }
+
+.dialog {
+  max-width: 28rem;
+  width: calc(100% - 32px);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+.dialog label { display: block; }
+.dialog input { display: block; width: 100%; margin-top: 0.5rem; padding: 0.4rem; font: inherit; }
+.dialog-buttons { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }

@@ -1,0 +1,14 @@
+{
+  "name": "Telefonos",
+  "short_name": "Telefonos",
+  "description": "Audio calls between a few people who paired once, peer to peer.",
+  "id": "./",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2f5d8a",
+  "icons": [
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+  ]
+}

@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Telefonos</title>
+  <meta name="description" content="Audio calls between a few people who paired once, peer to peer, with no server of its own.">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <!-- installed as an app: its name and icon (manifest), kept to open offline (sw.js) -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2f5d8a">
+  <link rel="stylesheet" href="css/app.css">
+  <!-- Trystero, pinned: the calls find each other through public Nostr relays, then go direct -->
+  <script type="importmap">
+    {
+      "imports": {
+        "trystero": "https://cdn.jsdelivr.net/npm/@trystero-p2p/nostr@0.26.0/+esm"
+      }
+    }
+  </script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Telefonos</h1>
+  </header>
+  <main id="app"></main>
+</body>
+</html>

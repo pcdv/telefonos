@@ -1,0 +1,11 @@
+{
+  "name": "telefonos",
+  "private": true,
+  "description": "Audio calls between a few people who paired once, peer to peer, with no server of its own",
+  "license": "Apache-2.0",
+  "type": "module",
+  "scripts": {
+    "serve": "node serve.js",
+    "test": "node --test \"test/**/*.test.js\""
+  }
+}
