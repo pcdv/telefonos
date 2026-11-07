@@ -10,9 +10,10 @@ closed one.
 
 ## How it works
 
-Pairing happens once. One person adds a contact and sends the invitation, a link whose fragment
-holds a random secret (128 bits). Whoever opens it names the contact and the pairing is done. The
-secret stays in each browser.
+Pairing happens once. One person adds a contact, which shows the invitation as a QR code: a link
+whose fragment holds a random secret (128 bits). The other scans it with the phone's camera, names
+the contact, and the pairing is done. When they are not in the same room, the link can be copied
+or shared instead. The secret stays in each browser.
 
 A call starts when everyone has opened the app and tapped the contact. The secret gives two
 hashes: the name of a room, and the password that seals the session descriptions. Each browser
@@ -55,12 +56,14 @@ A microphone needs a secure origin: `localhost` works, a phone on the network do
 - `web/js/secret.js` — the secret, the invitation link, the room and password derived from it.
 - `web/js/contacts.js` — the pairings kept in the browser.
 - `web/js/call.js` — the room, the microphone, the streams, the limit of four.
+- `web/js/qr.js` — the invitation as a QR code (an SVG).
 - `web/js/main.js` — the screens.
 - `web/js/lib/` — helpers synced from [web-lib](https://github.com/pcdv/web-lib); fixes are made
   there.
-- [Trystero](https://github.com/dmotz/trystero) 0.26.0, pinned in the import map of
-  `web/index.html`, is the only dependency. `web/js/trystero.d.ts` holds the part of its types
-  the page uses.
+- [Trystero](https://github.com/dmotz/trystero) 0.26.0 and
+  [qrcode-generator](https://github.com/kazuhikoarase/qrcode-generator) 1.4.4, pinned in the import
+  map of `web/index.html`, are the dependencies. `web/js/trystero.d.ts` and
+  `web/js/qrcode-generator.d.ts` hold the part of their types the page uses.
 
 ## License
 

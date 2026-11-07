@@ -31,5 +31,7 @@ never edit it; fix in web-lib, then `npm run sync -- ../telefonos/web/js/lib` th
   canceller working; keep them when touching `call.js`.
 - The cap of four is `onPeerHandshake` refusing a fifth. Checked with five headless Chromes (fake
   microphones, the public relays): the four keep three peers each, the fifth none.
-- Not done: a QR code for the invitation, push to ring a closed app (it needs a server), the
+- The invitation's QR code was checked by screenshotting it in headless Chrome and decoding it
+  with jsQR: it gave back the exact link.
+- Not done: push to ring a closed app (it needs a server), the
   PNG icons iOS prefers for the home screen, reconnection after a change of network (ICE restart).

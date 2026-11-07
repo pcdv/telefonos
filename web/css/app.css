@@ -85,6 +85,9 @@ button.danger { background: var(--danger); border-color: var(--danger); color: v
   color: var(--fg);
 }
 
+.dialog h2 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+.dialog .qr { width: min(18rem, 100%); margin: 0.5rem auto; }
+.dialog .qr svg { display: block; width: 100%; height: auto; }
 .dialog label { display: block; }
 .dialog input { display: block; width: 100%; margin-top: 0.5rem; padding: 0.4rem; font: inherit; }
 .dialog-buttons { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1rem; }

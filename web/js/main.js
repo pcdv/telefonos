@@ -8,6 +8,7 @@ import {readSetting, writeSetting} from './lib/settings.js';
 import {loadContacts, saveContacts, withContact, withoutContact} from './contacts.js';
 import {newSecret, inviteLink, parseInvite} from './secret.js';
 import {startCall, MAX_PEOPLE} from './call.js';
+import {qrSvg} from './qr.js';
 
 /** @typedef {import('./call.js').Call} Call */
 /** @typedef {import('./call.js').Peer} Peer */
@@ -65,29 +66,40 @@ async function add() {
     return;
   const contact = {name: name.trim(), secret: newSecret()};
   update(withContact(contacts, contact));
-  await invite(contact);
+  invite(contact);
 }
 
-/** @param {import('./contacts.js').Contact} contact */
-async function invite(contact) {
+/**
+ * Shows the invitation as a QR code, to be scanned with the camera of the other phone, and as a link
+ * to copy or share when the other is not in the room.
+ *
+ * @param {import('./contacts.js').Contact} contact
+ */
+function invite(contact) {
   // the one who opens the link names the contact as it is called here, in turn
   const link = inviteLink(location.href, contact.secret, readSetting('telefonos.me') || '');
-  if (navigator.share) {
+  const dialog = h('dialog', {class: 'dialog'});
+  const copy = h('button', {type: 'button', onclick: async () => {
     try {
-      await navigator.share({title: 'Telefonos', text: 'Pair with me on Telefonos', url: link});
-      return;
+      await navigator.clipboard.writeText(link);
+      copy.textContent = 'Copied';
     }
     catch (e) {
-      // dismissed, or refused: the link is copied instead
+      copy.textContent = 'Could not copy';
     }
-  }
-  try {
-    await navigator.clipboard.writeText(link);
-    await tell('The invitation is copied. Send it through a channel you trust: whoever opens it can join your calls.');
-  }
-  catch (e) {
-    await ask('Copy this invitation and send it through a channel you trust', link);
-  }
+  }}, 'Copy link');
+  dialog.append(h('form', {method: 'dialog'},
+    h('h2', null, `Pair with ${contact.name}`),
+    h('p', null, 'Scan this with the camera of the other phone. It opens the app and pairs.'),
+    h('div', {class: 'qr'}, qrSvg(link)),
+    h('p', {class: 'hint'}, 'Anyone who opens this invitation can join your calls: show it only to the person you pair with, or send the link through a channel you trust.'),
+    h('div', {class: 'dialog-buttons'},
+      copy,
+      navigator.share ? h('button', {type: 'button', onclick: () => navigator.share({title: 'Telefonos', url: link}).catch(() => {})}, 'Share') : null,
+      h('button', {class: 'primary', value: 'ok'}, 'Done'))));
+  dialog.addEventListener('close', () => dialog.remove());
+  document.body.append(dialog);
+  dialog.showModal();
 }
 
 /** @param {import('./contacts.js').Contact} contact */

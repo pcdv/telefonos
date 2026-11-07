@@ -10,11 +10,13 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#2f5d8a">
   <link rel="stylesheet" href="css/app.css">
-  <!-- Trystero, pinned: the calls find each other through public Nostr relays, then go direct -->
+  <!-- Trystero, pinned: the calls find each other through public Nostr relays, then go direct.
+       qrcode-generator, pinned: the QR code of an invitation -->
   <script type="importmap">
     {
       "imports": {
-        "trystero": "https://cdn.jsdelivr.net/npm/@trystero-p2p/nostr@0.26.0/+esm"
+        "trystero": "https://cdn.jsdelivr.net/npm/@trystero-p2p/nostr@0.26.0/+esm",
+        "qrcode-generator": "https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/+esm"
       }
     }
   </script>
