@@ -36,4 +36,10 @@ never edit it; fix in web-lib, then `npm run sync -- ../telefonos/web/js/lib` th
 - The icon is a cat with a headset. `icon.svg` is the source; the PNGs (`icon-192`, `icon-512`, the
   maskable one with the cat inside the central 70%, and `apple-touch-icon`) were rendered from it
   in headless Chrome, and the generating script is not kept: redraw the same SVG to change it.
+- Only the admin changes a contact's secret: ECDSA P-256, the public key in the invitation, the
+  private one non-extractable in IndexedDB. The signature covers the old secret, the new one and
+  the epoch; keep all three, or a change can be replayed or moved to another pairing. The new
+  secret is random, not derived from the old one: a derived one could be followed by whoever holds
+  a leaked link. Checked with two headless Chromes (two changes in a row, the same secrets and
+  epochs on both sides, the button on the admin's screen only).
 - Not done: push to ring a closed app (it needs a server), reconnection after a change of network (ICE restart).

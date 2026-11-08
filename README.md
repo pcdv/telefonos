@@ -35,8 +35,24 @@ grow with the square of the group. A fifth person who opens the call finds nobod
 - A phone that locks its screen suspends the page, and the call with it. The page asks for a
   screen wake lock where the browser has one.
 - The relays are public and run by others. Any may be down; Trystero uses several at once.
-- Whoever has the invitation can join the calls of that contact. To revoke, make a new contact
-  and send its invitation to those who stay.
+- Whoever has the invitation can join the calls of that contact. To revoke, the admin changes the
+  key (see below), or a new contact is made and its invitation sent to those who stay.
+
+## Changing the key
+
+The one who creates a contact is its admin. During a call, only the admin sees "Change the key".
+It replaces the secret for the people in the call, and the next call uses the new one. Whoever was
+not in the call keeps the old secret and finds nobody: they need a new invitation, which the admin
+or any member can show with Invite.
+
+Only the admin can do it because the others check a signature. The creator's device makes a key
+pair: the public key travels in the invitation and is kept with each contact, and the private key
+stays in IndexedDB, where the page can sign with it but not read it. A change of key is signed with
+it and carries the old secret and a counter, so a change made for another contact, or an old one
+sent again, is refused.
+
+The admin is bound to the device. If its site data is cleared, nobody can change the key of that
+contact any more, and a new contact is needed. A contact made before this existed has no admin.
 
 ## Run
 
@@ -54,6 +70,8 @@ A microphone needs a secure origin: `localhost` works, a phone on the network do
 ## Code
 
 - `web/js/secret.js` — the secret, the invitation link, the room and password derived from it.
+- `web/js/admin.js` — the admin's key pair, and the signed change of a secret.
+- `web/js/keystore.js` — where the admin's private key is kept (IndexedDB).
 - `web/js/contacts.js` — the pairings kept in the browser.
 - `web/js/call.js` — the room, the microphone, the streams, the limit of four.
 - `web/js/qr.js` — the invitation as a QR code (an SVG).

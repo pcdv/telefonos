@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {newSecret, isSecret, inviteLink, parseInvite, derive} from '../web/js/secret.js';
+import {newSecret, isSecret, inviteLink, parseInvite, derive, base64url, fromBase64url} from '../web/js/secret.js';
 
 test('a new secret is 22 characters of base64url and never the same twice', () => {
   const a = newSecret();
@@ -19,6 +19,19 @@ test('an invitation is read back, whatever the name holds', () => {
   const link = inviteLink('https://example.org/telefonos/?x=1#old', secret, 'Zoë & co=1');
   assert.ok(link.startsWith('https://example.org/telefonos/?x=1#join='));
   assert.deepEqual(parseInvite(new URL(link).hash), {secret, name: 'Zoë & co=1'});
+});
+
+test('the key of the admin travels in the invitation, if it looks like one', () => {
+  const secret = newSecret();
+  const admin = 'B'.repeat(87);
+  const link = inviteLink('https://example.org/telefonos/', secret, 'Zoë', admin);
+  assert.deepEqual(parseInvite(new URL(link).hash), {secret, name: 'Zoë', admin});
+  assert.deepEqual(parseInvite(`#join=${secret}&admin=short`), {secret, name: ''});
+});
+
+test('base64url reads back what it wrote', () => {
+  const bytes = crypto.getRandomValues(new Uint8Array(65));
+  assert.deepEqual(fromBase64url(base64url(bytes)), bytes);
 });
 
 test('a fragment that is not an invitation is ignored', () => {

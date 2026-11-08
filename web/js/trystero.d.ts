@@ -12,7 +12,7 @@ declare module 'trystero' {
     onPeerLeave: ((peerId: string) => void) | null;
     onPeerStream: ((stream: MediaStream, peerId: string) => void) | null;
     addStream(stream: MediaStream, options?: {target?: string | string[] | null}): Promise<void>[];
-    makeAction<T extends string>(namespace: string): MessageAction<T>;
+    makeAction<T>(namespace: string): MessageAction<T>;
     leave(): Promise<void>;
   }
 

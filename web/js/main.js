@@ -5,8 +5,10 @@
 import {h, replace, $} from './lib/dom.js';
 import {ask, tell} from './lib/dialog.js';
 import {readSetting, writeSetting} from './lib/settings.js';
-import {loadContacts, saveContacts, withContact, withoutContact} from './contacts.js';
+import {loadContacts, saveContacts, withContact, withoutContact, withSecret} from './contacts.js';
 import {newSecret, inviteLink, parseInvite} from './secret.js';
+import {newAdminKey} from './admin.js';
+import {saveKey, loadKey, deleteKey} from './keystore.js';
 import {startCall, MAX_PEOPLE} from './call.js';
 import {qrSvg} from './qr.js';
 
@@ -15,7 +17,7 @@ import {qrSvg} from './qr.js';
 
 const root = $('app', HTMLElement);
 let contacts = loadContacts();
-/** @type {{call: Call, contact: import('./contacts.js').Contact, muted: boolean, peers: Peer[]} | null} */
+/** @type {{call: Call, contact: import('./contacts.js').Contact, muted: boolean, peers: Peer[], notice: string} | null} */
 let active = null;
 
 if ('serviceWorker' in navigator)
@@ -31,7 +33,7 @@ async function acceptInvitation() {
   history.replaceState(null, '', location.pathname + location.search);
   const name = await ask('Name this contact', invite.name);
   if (name)
-    update(withContact(contacts, {name: name.trim(), secret: invite.secret}));
+    update(withContact(contacts, {name: name.trim(), secret: invite.secret, ...(invite.admin ? {admin: invite.admin} : {})}));
 }
 
 /** @param {typeof contacts} list */
@@ -64,7 +66,10 @@ async function add() {
   const name = await ask('Name of the contact or group');
   if (!name?.trim())
     return;
-  const contact = {name: name.trim(), secret: newSecret()};
+  // the creator is the admin of the pairing; where the key cannot be kept, the pairing has none
+  const key = await newAdminKey();
+  const admin = await saveKey(key.publicKey, key.privateKey) ? key.publicKey : undefined;
+  const contact = {name: name.trim(), secret: newSecret(), ...(admin ? {admin} : {})};
   update(withContact(contacts, contact));
   invite(contact);
 }
@@ -77,7 +82,7 @@ async function add() {
  */
 function invite(contact) {
   // the one who opens the link names the contact as it is called here, in turn
-  const link = inviteLink(location.href, contact.secret, readSetting('telefonos.me') || '');
+  const link = inviteLink(location.href, contact.secret, readSetting('telefonos.me') || '', contact.admin);
   const dialog = h('dialog', {class: 'dialog'});
   const copy = h('button', {type: 'button', onclick: async () => {
     try {
@@ -104,8 +109,11 @@ function invite(contact) {
 
 /** @param {import('./contacts.js').Contact} contact */
 function remove(contact) {
-  if (confirm(`Remove ${contact.name}? A new pairing is needed to call again.`))
-    update(withoutContact(contacts, contact.secret));
+  if (!confirm(`Remove ${contact.name}? A new pairing is needed to call again.`))
+    return;
+  if (contact.admin)
+    deleteKey(contact.admin);
+  update(withoutContact(contacts, contact.secret));
 }
 
 async function settings() {
@@ -135,12 +143,22 @@ function turnServers() {
 
 /** @param {import('./contacts.js').Contact} contact */
 async function call(contact) {
-  const state = {contact, muted: false, peers: /** @type {Peer[]} */ ([]), call: /** @type {any} */ (null)};
+  const state = {contact, muted: false, peers: /** @type {Peer[]} */ ([]), notice: '', call: /** @type {any} */ (null)};
+  // the secret that is in force: the contact is found by it, and it changes with the pairing
+  let secret = contact.secret;
   try {
     state.call = await startCall({
-      secret: contact.secret,
+      secret,
       name: readSetting('telefonos.me') || 'Someone',
       turn: turnServers(),
+      admin: contact.admin,
+      epoch: contact.epoch,
+      adminKey: contact.admin ? await loadKey(contact.admin) : null,
+      onRotated: (next, epoch) => {
+        state.notice = 'The key of this contact was changed. The next call uses the new one.';
+        update(withSecret(contacts, secret, next, epoch));
+        secret = next;
+      },
       onPeers: peers => {
         state.peers = peers;
         if (active === state)
@@ -166,14 +184,36 @@ function callScreen(state) {
     h('ul', {class: 'peers'}, state.peers.length
       ? state.peers.map(p => h('li', {class: p.state}, h('span', {class: 'name'}, p.name), h('span', {class: 'state'}, p.state)))
       : h('li', {class: 'waiting'}, `Waiting for the others to open the app and call you. If nobody comes, the call may be full (${MAX_PEOPLE} people at most).`)),
+    state.notice ? h('p', {class: 'hint'}, state.notice) : null,
     h('div', {class: 'actions'},
       h('button', {onclick: () => {
         state.muted = !state.muted;
         state.call.mute(state.muted);
         show();
       }}, state.muted ? 'Unmute' : 'Mute'),
+      state.call.rotate && state.peers.length ? h('button', {onclick: () => rotate(state)}, 'Change the key') : null,
       h('button', {class: 'danger', onclick: hangUp}, 'Hang up')),
   ];
+}
+
+/**
+ * The admin changes the secret of the contact for the people in the call. Whoever is not in it keeps
+ * the old one and finds nobody next time: they need a new invitation.
+ *
+ * @param {NonNullable<typeof active>} state
+ */
+async function rotate(state) {
+  if (!confirm(`Change the key of ${state.contact.name}? Anyone who is not in this call will need a new invitation.`))
+    return;
+  try {
+    const {changed, of} = await /** @type {NonNullable<Call['rotate']>} */ (state.call.rotate)();
+    state.notice = `Key changed for ${changed} of ${of} in the call. Use Invite to pair others again.`;
+  }
+  catch (e) {
+    state.notice = `The key was not changed: ${e instanceof Error ? e.message : e}`;
+  }
+  if (active === state)
+    show();
 }
 
 async function hangUp() {
